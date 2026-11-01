@@ -1343,6 +1343,88 @@
     }
 
     /* CART CHECKOUT DOCK (PINNED / SLEEK CHECKOUT SECTION) */
+
+    /* INLINE CART PROMOCODE ROW (Directly below 'Оформить заказ') */
+    .cart-promo-inline-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(168, 85, 247, 0.28);
+      border-radius: 14px;
+      padding: 4px 6px 4px 12px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .cart-promo-inline-wrap:focus-within {
+      border-color: #a855f7;
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.25);
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .cart-promo-inline-wrap.applied {
+      border-color: rgba(34, 197, 94, 0.5);
+      background: rgba(34, 197, 94, 0.07);
+    }
+    .cart-promo-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 8px 0;
+    }
+    .cart-promo-input::placeholder {
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0px;
+      text-transform: none;
+    }
+    .cart-promo-action-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      flex-shrink: 0;
+    }
+    .cart-promo-action-btn.btn-apply {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);
+    }
+    .cart-promo-action-btn.btn-apply:hover {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
+    .cart-promo-action-btn.btn-remove {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(239, 68, 68, 0.35);
+    }
+    .cart-promo-action-btn.btn-remove:hover {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
+    .cart-promo-hint {
+      font-size: 11.5px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      padding: 4px 6px;
+      border-radius: 8px;
+      display: none;
+      margin-top: -4px;
+    }
+
     .cart-checkout-dock {
       margin-top: 16px;
       padding-top: 14px;
@@ -2027,13 +2109,6 @@ body::after {
         <span class="brand-title-text">SolKni</span>
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
-        <!-- PROMOCODE BUTTON -->
-        <button id="promo-btn" class="promo-btn-top" onclick="openPromoModal()" title="Промокод">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-            <line x1="7" y1="7" x2="7.01" y2="7"></line>
-          </svg>
-        </button>
         <button id="lang-switch-btn" class="lang-btn" onclick="toggleLanguage()">
           <span id="lang-indicator">RU</span>
         </button>
@@ -2214,6 +2289,31 @@ body::after {
         <button onclick="closeBundleConflictModal(false)" class="btn-conflict-cancel" style="flex:1; padding:12px; border-radius:14px; background:rgba(255, 255, 255, 0.06); border:1px solid rgba(255, 255, 255, 0.12); color:#cbd5e1; font-family:'Plus Jakarta Sans', sans-serif; font-weight:600; font-size:13.5px; cursor:pointer; transition:all 0.2s;">Отмена</button>
         <button onclick="confirmBundleReplacement()" class="btn-conflict-confirm" style="flex:1.2; padding:12px; border-radius:14px; background:linear-gradient(135deg, #a855f7 0%, #7e22ce 100%); border:1px solid #c084fc; color:#ffffff; font-family:'Plus Jakarta Sans', sans-serif; font-weight:700; font-size:13.5px; cursor:pointer; box-shadow:0 4px 16px rgba(168, 85, 247, 0.35); transition:all 0.2s;">Заменить</button>
       </div>
+    </div>
+  </div>
+
+  
+  <!-- PROMO CONDITIONS NOT MET POPUP MODAL -->
+  <div class="modal-overlay" id="promo-cond-modal" onclick="handleBackdropClick(event, 'promo-cond-modal')" style="justify-content:center; padding:20px; z-index:10009;">
+    <div class="modal-outer-nav">
+      <button class="btn-top-back" onclick="closePromoCondModal()" title="Закрыть">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        <span data-i18n="back_btn">Назад</span>
+      </button>
+    </div>
+    <div class="modal-sheet" onclick="event.stopPropagation()" style="max-width:390px; width:100%; border-radius:24px; border:1px solid rgba(245, 158, 11, 0.45); background:linear-gradient(165deg, rgba(28, 17, 43, 0.98) 0%, rgba(14, 7, 24, 0.98) 100%); padding:24px 20px; text-align:center; animation:popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1); box-shadow:0 12px 40px rgba(0, 0, 0, 0.65);">
+      <div style="width:52px; height:52px; margin:0 auto 14px; border-radius:16px; background:rgba(245, 158, 11, 0.14); border:1px solid rgba(245, 158, 11, 0.4); display:grid; place-items:center; font-size:24px; color:#fbbf24;">
+        ⚠️
+      </div>
+      <h2 class="modal-title" id="promo-cond-title" style="margin-bottom:8px; font-size:18px; color:#ffffff;">Условие промокода</h2>
+      <div id="promo-cond-text" style="font-size:13px; line-height:1.6; color:#cbd5e1; margin-bottom:20px; text-align:center; background:rgba(255, 255, 255, 0.03); border:1px solid rgba(255, 255, 255, 0.08); padding:14px; border-radius:14px;">
+        <!-- Dynamic Condition Message -->
+      </div>
+      <button onclick="closePromoCondModal()" style="width:100%; padding:13px; border-radius:14px; background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border:1px solid #fbbf24; color:#000000; font-family:'Plus Jakarta Sans', sans-serif; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 4px 16px rgba(245, 158, 11, 0.35); transition:all 0.2s;">
+        Понятно, набрать еще
+      </button>
     </div>
   </div>
 
@@ -2427,6 +2527,16 @@ body::after {
           <span class="cart-checkout-price" id="cart-total-price">0 ₽</span>
         </div>
         <button class="btn-submit" onclick="submitCartOrder()" data-i18n="btn_checkout">Оформить заказ</button>
+        <!-- PROMOCODE INPUT LINE (Directly under submit button) -->
+        <div class="cart-promo-inline-wrap" id="cart-promo-inline-wrap">
+          <input type="text" class="cart-promo-input" id="cart-promo-input" placeholder="Промокод" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter') toggleCartPromo();">
+          <button type="button" class="cart-promo-action-btn btn-apply" id="cart-promo-action-btn" onclick="toggleCartPromo()" title="Применить промокод">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <div class="cart-promo-hint" id="cart-promo-hint"></div>
         <button class="btn-clear-cart-link" onclick="confirmClearCart()" data-i18n="clear_cart">Очистить корзину</button>
       </div>
     </div>
@@ -2559,9 +2669,15 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
     let isDropdownOpen = false;
     let cart = [];
     let appliedDiscountPercent = 0;
+    let appliedPromoCode = "";
+    let appliedPromoObject = null;
     let currentModalQty = 1;
     let toastTimer = null;
-    let selectedGifts = { 200: null, 400: null }; // Tracks selected gift per tier
+    let selectedGifts = { 200: null, 400: null };
+      appliedPromoCode = '';
+      appliedDiscountPercent = 0;
+      appliedPromoObject = null;
+      updateCartPromoUI(); // Tracks selected gift per tier
 
     const CAT_TITLES = {
       all: "Все товары",
@@ -2596,6 +2712,7 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
         onSearchInput(document.getElementById("single-search-input").value || "");
       }
       renderCartItems();
+      updateCartPromoUI();
     }
 
     function applyTranslations() {
@@ -2983,6 +3100,7 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
         else if (modalId === "gift-modal") closeGiftModal();
         else if (modalId === "bundle-conflict-modal") closeBundleConflictModal(false);
         else if (modalId === "confirm-action-modal") closeConfirmActionModal();
+        else if (modalId === "promo-cond-modal") closePromoCondModal();
         else if (modalId === "payment-expiry-modal") closePaymentExpiryModal();
         if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred("light");
       }
@@ -3146,10 +3264,114 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
       updateFloatingOrderBar();
     }
 
-    function applyPromoCode() {
-      const code = (document.getElementById("promo-input").value || "").trim().toUpperCase();
-      const statusEl = document.getElementById("promo-status-msg");
-      statusEl.style.display = "block";
+    
+    function getResolvedTelegramUserId() {
+      try {
+        if (window.Telegram && window.Telegram.WebApp) {
+          const wa = window.Telegram.WebApp;
+          if (wa.initDataUnsafe && wa.initDataUnsafe.user && wa.initDataUnsafe.user.id) {
+            return wa.initDataUnsafe.user.id;
+          } else if (wa.initData) {
+            const params = new URLSearchParams(wa.initData);
+            const userStr = params.get("user");
+            if (userStr) {
+              const uObj = JSON.parse(userStr);
+              if (uObj && uObj.id) return uObj.id;
+            }
+          }
+        }
+        const urlParams = new URLSearchParams(window.location.search);
+        const qId = urlParams.get("tg_user_id") || urlParams.get("tg_id") || urlParams.get("user_id");
+        if (qId) return parseInt(qId, 10);
+        const cachedId = localStorage.getItem("sk_last_tg_user_id");
+        if (cachedId) return parseInt(cachedId, 10);
+      } catch(e) {}
+      return null;
+    }
+
+    function openPromoCondModal(title, text) {
+      const modal = document.getElementById("promo-cond-modal");
+      if (!modal) {
+        if (tg && tg.showAlert) tg.showAlert(text);
+        else alert(text);
+        return;
+      }
+      const titleEl = document.getElementById("promo-cond-title");
+      const textEl = document.getElementById("promo-cond-text");
+      if (titleEl) titleEl.innerText = title || (currentLang === 'en' ? 'Promo Code Requirement' : 'Условие промокода');
+      if (textEl) textEl.innerHTML = text;
+      modal.style.display = "flex";
+      syncModalScrollState();
+      if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("warning");
+    }
+
+    function closePromoCondModal() {
+      const modal = document.getElementById("promo-cond-modal");
+      if (modal) modal.style.display = "none";
+      syncModalScrollState();
+    }
+
+    function toggleCartPromo() {
+      if (appliedPromoCode) {
+        removeCartPromoCode();
+      } else {
+        applyCartPromoCode();
+      }
+    }
+
+    function updateCartPromoUI() {
+      const inputEl = document.getElementById("cart-promo-input");
+      const btnEl = document.getElementById("cart-promo-action-btn");
+      const wrapEl = document.getElementById("cart-promo-inline-wrap");
+      const hintEl = document.getElementById("cart-promo-hint");
+      if (!inputEl || !btnEl) return;
+
+      if (appliedPromoCode) {
+        inputEl.value = appliedPromoCode;
+        inputEl.disabled = true;
+        if (wrapEl) wrapEl.classList.add("applied");
+        btnEl.className = "cart-promo-action-btn btn-remove";
+        btnEl.title = currentLang === 'en' ? "Remove promo code" : "Убрать промокод";
+        btnEl.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        `;
+        if (hintEl) {
+          hintEl.style.display = "block";
+          hintEl.style.color = "#10b981";
+          hintEl.style.background = "rgba(16, 185, 129, 0.12)";
+          hintEl.style.border = "1px solid rgba(16, 185, 129, 0.3)";
+          hintEl.innerHTML = currentLang === 'en' 
+            ? `✓ Promo <b>${appliedPromoCode}</b> applied (-${appliedDiscountPercent}%)` 
+            : `✓ Промокод <b>${appliedPromoCode}</b> применен (-${appliedDiscountPercent}%)`;
+        }
+      } else {
+        inputEl.disabled = false;
+        if (wrapEl) wrapEl.classList.remove("applied");
+        btnEl.className = "cart-promo-action-btn btn-apply";
+        btnEl.title = currentLang === 'en' ? "Apply promo code" : "Применить промокод";
+        btnEl.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        `;
+        if (hintEl) {
+          hintEl.style.display = "none";
+        }
+      }
+    }
+
+    function applyCartPromoCode() {
+      const inputEl = document.getElementById("cart-promo-input");
+      const hintEl = document.getElementById("cart-promo-hint");
+      if (!inputEl) return;
+      const rawCode = (inputEl.value || "").trim().toUpperCase();
+      if (!rawCode) {
+        inputEl.focus();
+        return;
+      }
 
       const validPromos = Object.assign({
         "SOLKNI": 15,
@@ -3159,30 +3381,148 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
         "FREE": 25
       }, window._dynamicPromos || {});
 
-      if (validPromos[code]) {
-        appliedDiscountPercent = validPromos[code];
-        statusEl.style.background = "rgba(16, 185, 129, 0.15)";
-        statusEl.style.border = "1px solid #10b981";
-        statusEl.style.color = "#10b981";
-        const succMsg = currentLang === 'en' 
-          ? `Promo code ${code} applied! -${appliedDiscountPercent}% discount on cart.`
-          : `Промокод ${code} активирован! Скидка -${appliedDiscountPercent}% применена.`;
-        statusEl.innerText = succMsg;
-        renderCartItems();
-
-        if (tg && tg.HapticFeedback) {
-          tg.HapticFeedback.notificationOccurred("success");
+      const promoData = validPromos[rawCode];
+      if (!promoData) {
+        if (hintEl) {
+          hintEl.style.display = "block";
+          hintEl.style.color = "#ef4444";
+          hintEl.style.background = "rgba(239, 68, 68, 0.12)";
+          hintEl.style.border = "1px solid rgba(239, 68, 68, 0.3)";
+          hintEl.innerText = I18N[currentLang].promo_invalid || "Неверный или недействительный промокод.";
         }
-        setTimeout(() => closePromoModal(), 1200);
-      } else {
-        statusEl.style.background = "rgba(239, 68, 68, 0.15)";
-        statusEl.style.border = "1px solid #ef4444";
-        statusEl.style.color = "#ef4444";
-        statusEl.innerText = I18N[currentLang].promo_invalid;
-        if (tg && tg.HapticFeedback) {
-          tg.HapticFeedback.notificationOccurred("error");
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("error");
+        return;
+      }
+
+      // Extract promo schema fields
+      let discount = 0;
+      let minOrderSum = 0;
+      let maxUses = 0;
+      let usedCount = 0;
+      let usesPerUser = 1;
+      let usedUsers = {};
+      let expiresAt = null;
+
+      if (typeof promoData === "number") {
+        discount = promoData;
+      } else if (typeof promoData === "object" && promoData !== null) {
+        discount = Number(promoData.discount || 0);
+        minOrderSum = Number(promoData.min_order_sum || 0);
+        maxUses = Number(promoData.max_uses || 0);
+        usedCount = Number(promoData.used_count || 0);
+        usesPerUser = promoData.uses_per_user !== undefined ? Number(promoData.uses_per_user) : 1;
+        usedUsers = promoData.used_users || {};
+        expiresAt = promoData.expires_at || null;
+      }
+
+      if (discount <= 0 || discount >= 100) {
+        if (hintEl) {
+          hintEl.style.display = "block";
+          hintEl.style.color = "#ef4444";
+          hintEl.style.background = "rgba(239, 68, 68, 0.12)";
+          hintEl.style.border = "1px solid rgba(239, 68, 68, 0.3)";
+          hintEl.innerText = "Промокод недействителен (некорректная скидка).";
+        }
+        return;
+      }
+
+      // Check Expiry Date/Time
+      if (expiresAt && Date.now() > expiresAt) {
+        const msg = currentLang === 'en' ? "This promo code has expired!" : "Срок действия этого промокода истек!";
+        if (hintEl) {
+          hintEl.style.display = "block";
+          hintEl.style.color = "#ef4444";
+          hintEl.style.background = "rgba(239, 68, 68, 0.12)";
+          hintEl.style.border = "1px solid rgba(239, 68, 68, 0.3)";
+          hintEl.innerText = msg;
+        }
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("error");
+        return;
+      }
+
+      // Check Global Total Uses Limit
+      if (maxUses > 0 && usedCount >= maxUses) {
+        const msg = currentLang === 'en' ? "This promo code has reached its activation limit!" : "Лимит активаций этого промокода исчерпан!";
+        if (hintEl) {
+          hintEl.style.display = "block";
+          hintEl.style.color = "#ef4444";
+          hintEl.style.background = "rgba(239, 68, 68, 0.12)";
+          hintEl.style.border = "1px solid rgba(239, 68, 68, 0.3)";
+          hintEl.innerText = msg;
+        }
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("error");
+        return;
+      }
+
+      // Check User Activations Limit (uses_per_user)
+      const currentTgId = getResolvedTelegramUserId();
+      if (currentTgId && usesPerUser > 0) {
+        const userUsage = (usedUsers && usedUsers[String(currentTgId)]) ? Number(usedUsers[String(currentTgId)]) : 0;
+        if (userUsage >= usesPerUser) {
+          const msg = currentLang === 'en' 
+            ? `You have already used this promo code (limit: ${usesPerUser} time per user)!` 
+            : `Вы уже использовали этот промокод (лимит: ${usesPerUser} раз для одного пользователя)!`;
+          if (hintEl) {
+            hintEl.style.display = "block";
+            hintEl.style.color = "#ef4444";
+            hintEl.style.background = "rgba(239, 68, 68, 0.12)";
+            hintEl.style.border = "1px solid rgba(239, 68, 68, 0.3)";
+            hintEl.innerText = msg;
+          }
+          if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("error");
+          return;
         }
       }
+
+      // Check Minimum Order Sum Condition
+      const rawCartTotal = cart.reduce((sum, item) => sum + ((item.unit_price || item.price) * (item.qty || 1)), 0);
+      if (minOrderSum > 0 && rawCartTotal < minOrderSum) {
+        const diff = minOrderSum - rawCartTotal;
+        const alertHtml = currentLang === 'en'
+          ? `Promo code <b>${rawCode}</b> requires a cart total of at least <b>${minOrderSum} ₽</b>.<br><br>Your current cart is <b>${rawCartTotal} ₽</b>. Please add items worth at least <b>+${diff} ₽</b> to activate the ${discount}% discount!`
+          : `Для применения промокода <b>${rawCode}</b> необходимо набрать товаров в корзину минимум на <b>${minOrderSum} ₽</b>!<br><br>Сейчас в корзине: <b>${rawCartTotal} ₽</b>. Добавьте товаров еще на <b>+${diff} ₽</b>, чтобы получить скидку ${discount}%!`;
+        
+        openPromoCondModal(
+          currentLang === 'en' ? 'Promo Code Requirement' : 'Условие промокода',
+          alertHtml
+        );
+        return;
+      }
+
+      // Promocode successfully applied!
+      appliedPromoCode = rawCode;
+      appliedDiscountPercent = discount;
+      appliedPromoObject = (typeof promoData === "object") ? promoData : { discount: discount };
+
+      updateCartPromoUI();
+      renderCartItems();
+
+      if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
+      const succMsg = currentLang === 'en' 
+        ? `Promo code ${rawCode} applied! -${discount}% discount on cart.`
+        : `Промокод ${rawCode} активирован! Скидка -${discount}% применена.`;
+      if (typeof showToast === 'function') showToast(succMsg);
+    }
+
+    function removeCartPromoCode() {
+      appliedPromoCode = "";
+      appliedDiscountPercent = 0;
+      appliedPromoObject = null;
+      const inputEl = document.getElementById("cart-promo-input");
+      if (inputEl) inputEl.value = "";
+      updateCartPromoUI();
+      renderCartItems();
+      if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred("light");
+    }
+
+    function applyPromoCode() {
+      // Legacy modal fallback: redirects to inline application
+      const code = (document.getElementById("promo-input").value || "").trim().toUpperCase();
+      const inputEl = document.getElementById("cart-promo-input");
+      if (inputEl) inputEl.value = code;
+      closePromoModal();
+      openCartModal();
+      applyCartPromoCode();
     }
 
     function toggleDropdown() {
@@ -4064,6 +4404,24 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
         return;
       }
 
+      // Validate active promocode minimum order sum requirement
+      if (appliedPromoCode && appliedPromoObject && appliedPromoObject.min_order_sum) {
+        const promoMin = Number(appliedPromoObject.min_order_sum);
+        const currentRawTotal = cart.reduce((sum, item) => sum + ((item.unit_price || item.price) * (item.qty || 1)), 0);
+        if (currentRawTotal < promoMin) {
+          const diff = promoMin - currentRawTotal;
+          const alertHtml = currentLang === 'en'
+            ? `Your applied promo code <b>${appliedPromoCode}</b> requires a minimum cart sum of <b>${promoMin} ₽</b>.<br><br>Current sum is <b>${currentRawTotal} ₽</b>. Please add items for <b>+${diff} ₽</b> to checkout with this discount!`
+            : `Для использования активированного промокода <b>${appliedPromoCode}</b> сумма товаров должна быть не менее <b>${promoMin} ₽</b>!<br><br>Сейчас: <b>${currentRawTotal} ₽</b>. Добавьте товаров еще на <b>+${diff} ₽</b>, чтобы оформить заказ!`;
+          openPromoCondModal(
+            currentLang === 'en' ? 'Promo Code Requirement' : 'Условие промокода',
+            alertHtml
+          );
+          return;
+        }
+      }
+
+
       // Check 50 ₽ minimum threshold for qualifying custom items
       let qualifyingSum = 0;
       let hasCustomServices = false;
@@ -4227,6 +4585,32 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
             } catch(e_tg) {
               console.warn("TG user ID resolution error:", e_tg);
             }
+            
+            // Update Promocode usage in Firebase
+            if (appliedPromoCode) {
+              try {
+                const pCode = appliedPromoCode;
+                const pFetch = await fetch(`https://myproj-37ea2-default-rtdb.firebaseio.com/promocodes/${pCode}.json`);
+                if (pFetch.ok) {
+                  const curPData = await pFetch.json();
+                  if (curPData && typeof curPData === 'object') {
+                    const newCount = (curPData.used_count || 0) + 1;
+                    const uUsers = curPData.used_users || {};
+                    if (tgUserId) {
+                      uUsers[String(tgUserId)] = (uUsers[String(tgUserId)] || 0) + 1;
+                    }
+                    await fetch(`https://myproj-37ea2-default-rtdb.firebaseio.com/promocodes/${pCode}.json`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ used_count: newCount, used_users: uUsers })
+                    });
+                  }
+                }
+              } catch(promoUpdErr) {
+                console.warn("Promo usage update error:", promoUpdErr);
+              }
+            }
+
             await fetch(fbUrl, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
