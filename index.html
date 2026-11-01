@@ -3735,14 +3735,17 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
         container.appendChild(row);
       });
 
-      // Update Threshold progress bar UI
+      // Update Threshold progress bar UI (takes promo discount into account so 50 rub net payable is required)
       if (threshBox) {
         if (hasCustomServices) {
           threshBox.style.display = "block";
+          const effectiveQualifyingSum = appliedDiscountPercent > 0 
+            ? Math.round(qualifyingSum * (1 - appliedDiscountPercent / 100)) 
+            : qualifyingSum;
           const targetThreshold = 50;
-          const pct = Math.min(100, Math.round((qualifyingSum / targetThreshold) * 100));
-          const isComplete = qualifyingSum >= targetThreshold;
-          const diff = Math.max(0, targetThreshold - qualifyingSum);
+          const pct = Math.min(100, Math.round((effectiveQualifyingSum / targetThreshold) * 100));
+          const isComplete = effectiveQualifyingSum >= targetThreshold;
+          const diff = Math.max(0, targetThreshold - effectiveQualifyingSum);
 
           const titleText = currentLang === 'en' ? 'Minimum order threshold' : 'Порог минимального заказа';
           const statusText = isComplete
@@ -3752,7 +3755,7 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
           threshBox.innerHTML = `
             <div class="cart-threshold-header">
               <span style="color:#ffffff;">${titleText}</span>
-              <span style="color:${isComplete ? '#10b981' : '#f59e0b'}; font-family:'Space Grotesk',sans-serif; font-weight:800;">${qualifyingSum} / ${targetThreshold} ₽</span>
+              <span style="color:${isComplete ? '#10b981' : '#f59e0b'}; font-family:'Space Grotesk',sans-serif; font-weight:800;">${effectiveQualifyingSum} / ${targetThreshold} ₽</span>
             </div>
             <div class="cart-threshold-bar-bg">
               <div class="cart-threshold-bar-fill ${isComplete ? 'complete' : ''}" style="width: ${pct}%;"></div>
@@ -4075,11 +4078,15 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
         }
       });
 
-      if (hasCustomServices && qualifyingSum < 50) {
-        const diff = 50 - qualifyingSum;
+      const effectiveQualifyingSum = appliedDiscountPercent > 0 
+        ? Math.round(qualifyingSum * (1 - appliedDiscountPercent / 100)) 
+        : qualifyingSum;
+
+      if (hasCustomServices && effectiveQualifyingSum < 50) {
+        const diff = 50 - effectiveQualifyingSum;
         const errAlert = currentLang === 'en' 
-          ? `Minimum order threshold is 50 ₽! Please add ${diff} ₽ more to proceed.` 
-          : `Минимальный заказ в сумме должен быть не менее 50 руб! Добавьте еще товаров на ${diff} ₽.`;
+          ? `Minimum payable sum after discount must be at least 50 ₽! (Currently: ${effectiveQualifyingSum} ₽, add +${diff} ₽)` 
+          : `Минимальная сумма к оплате с учетом скидки должен быть не менее 50 руб! (Сейчас: ${effectiveQualifyingSum} ₽, добавьте +${diff} ₽).`;
         if (tg && tg.showAlert) tg.showAlert(errAlert);
         else alert(errAlert);
         return;
@@ -4192,8 +4199,33 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
           // 1. Посылаем запрос в облачную очередь Firebase на VDS
           try {
             let tgUserId = null;
-            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-              tgUserId = window.Telegram.WebApp.initDataUnsafe.user.id;
+            try {
+              if (window.Telegram && window.Telegram.WebApp) {
+                const wa = window.Telegram.WebApp;
+                if (wa.initDataUnsafe && wa.initDataUnsafe.user && wa.initDataUnsafe.user.id) {
+                  tgUserId = wa.initDataUnsafe.user.id;
+                } else if (wa.initData) {
+                  const params = new URLSearchParams(wa.initData);
+                  const userStr = params.get("user");
+                  if (userStr) {
+                    const uObj = JSON.parse(userStr);
+                    if (uObj && uObj.id) tgUserId = uObj.id;
+                  }
+                }
+              }
+              if (!tgUserId) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const qId = urlParams.get("tg_user_id") || urlParams.get("tg_id") || urlParams.get("user_id");
+                if (qId) tgUserId = parseInt(qId, 10);
+              }
+              if (tgUserId) {
+                localStorage.setItem("sk_last_tg_user_id", tgUserId);
+              } else {
+                const cachedId = localStorage.getItem("sk_last_tg_user_id");
+                if (cachedId) tgUserId = parseInt(cachedId, 10);
+              }
+            } catch(e_tg) {
+              console.warn("TG user ID resolution error:", e_tg);
             }
             await fetch(fbUrl, {
               method: 'PUT',
