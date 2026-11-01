@@ -3270,21 +3270,63 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
         if (window.Telegram && window.Telegram.WebApp) {
           const wa = window.Telegram.WebApp;
           if (wa.initDataUnsafe && wa.initDataUnsafe.user && wa.initDataUnsafe.user.id) {
-            return wa.initDataUnsafe.user.id;
-          } else if (wa.initData) {
-            const params = new URLSearchParams(wa.initData);
-            const userStr = params.get("user");
-            if (userStr) {
-              const uObj = JSON.parse(userStr);
-              if (uObj && uObj.id) return uObj.id;
-            }
+            const uid = parseInt(wa.initDataUnsafe.user.id, 10);
+            if (uid) { localStorage.setItem("sk_last_tg_user_id", uid); return uid; }
+          }
+          if (wa.initData) {
+            try {
+              const params = new URLSearchParams(wa.initData);
+              const userStr = params.get("user");
+              if (userStr) {
+                const uObj = JSON.parse(decodeURIComponent(userStr));
+                if (uObj && uObj.id) {
+                  const uid = parseInt(uObj.id, 10);
+                  if (uid) { localStorage.setItem("sk_last_tg_user_id", uid); return uid; }
+                }
+              }
+            } catch(e1) {}
           }
         }
+
+        // Check query params in window.location.search
         const urlParams = new URLSearchParams(window.location.search);
         const qId = urlParams.get("tg_user_id") || urlParams.get("tg_id") || urlParams.get("user_id");
-        if (qId) return parseInt(qId, 10);
+        if (qId) {
+          const uid = parseInt(qId, 10);
+          if (uid) { localStorage.setItem("sk_last_tg_user_id", uid); return uid; }
+        }
+
+        // Check window.location.hash (Telegram WebApp often passes tgWebAppData in hash!)
+        if (window.location.hash) {
+          try {
+            const hashStr = window.location.hash.substring(1);
+            const hashParams = new URLSearchParams(hashStr);
+            const hashUid = hashParams.get("tg_user_id") || hashParams.get("tg_id") || hashParams.get("user_id");
+            if (hashUid) {
+              const uid = parseInt(hashUid, 10);
+              if (uid) { localStorage.setItem("sk_last_tg_user_id", uid); return uid; }
+            }
+            const tgData = hashParams.get("tgWebAppData");
+            if (tgData) {
+              const innerParams = new URLSearchParams(tgData);
+              const uStr = innerParams.get("user");
+              if (uStr) {
+                const uObj = JSON.parse(decodeURIComponent(uStr));
+                if (uObj && uObj.id) {
+                  const uid = parseInt(uObj.id, 10);
+                  if (uid) { localStorage.setItem("sk_last_tg_user_id", uid); return uid; }
+                }
+              }
+            }
+          } catch(e2) {}
+        }
+
+        // Cached fallback
         const cachedId = localStorage.getItem("sk_last_tg_user_id");
-        if (cachedId) return parseInt(cachedId, 10);
+        if (cachedId) {
+          const uid = parseInt(cachedId, 10);
+          if (uid) return uid;
+        }
       } catch(e) {}
       return null;
     }
@@ -3374,11 +3416,7 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
       }
 
       const validPromos = Object.assign({
-        "SOLKNI": 15,
-        "SOLKNI2026": 20,
-        "CHILLY": 10,
-        "FUNPAY": 10,
-        "FREE": 25
+	  
       }, window._dynamicPromos || {});
 
       const promoData = validPromos[rawCode];
@@ -4556,35 +4594,7 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
         if (window.fetch) {
           // 1. Посылаем запрос в облачную очередь Firebase на VDS
           try {
-            let tgUserId = null;
-            try {
-              if (window.Telegram && window.Telegram.WebApp) {
-                const wa = window.Telegram.WebApp;
-                if (wa.initDataUnsafe && wa.initDataUnsafe.user && wa.initDataUnsafe.user.id) {
-                  tgUserId = wa.initDataUnsafe.user.id;
-                } else if (wa.initData) {
-                  const params = new URLSearchParams(wa.initData);
-                  const userStr = params.get("user");
-                  if (userStr) {
-                    const uObj = JSON.parse(userStr);
-                    if (uObj && uObj.id) tgUserId = uObj.id;
-                  }
-                }
-              }
-              if (!tgUserId) {
-                const urlParams = new URLSearchParams(window.location.search);
-                const qId = urlParams.get("tg_user_id") || urlParams.get("tg_id") || urlParams.get("user_id");
-                if (qId) tgUserId = parseInt(qId, 10);
-              }
-              if (tgUserId) {
-                localStorage.setItem("sk_last_tg_user_id", tgUserId);
-              } else {
-                const cachedId = localStorage.getItem("sk_last_tg_user_id");
-                if (cachedId) tgUserId = parseInt(cachedId, 10);
-              }
-            } catch(e_tg) {
-              console.warn("TG user ID resolution error:", e_tg);
-            }
+            let tgUserId = getResolvedTelegramUserId();
             
             // Update Promocode usage in Firebase
             if (appliedPromoCode) {
