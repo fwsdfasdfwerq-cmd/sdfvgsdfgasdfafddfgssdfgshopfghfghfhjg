@@ -4035,6 +4035,7 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
       }
 
       // Build lot description for FunPay
+      const giftsListStr = earnedGifts.length > 0 ? `\n🎁 Бонусы:\n` + earnedGifts.map(g => `• ${g}`).join('\n') : "";
       let includedItems = [];
       let overflowCount = 0;
       let currentLength = 20 + giftsListStr.length;
