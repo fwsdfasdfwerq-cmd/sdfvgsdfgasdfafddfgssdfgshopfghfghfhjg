@@ -57,7 +57,7 @@
         radial-gradient(circle at 0% 50%, rgba(147, 51, 234, 0.08) 0%, transparent 45%);
       background-attachment: fixed;
       color: var(--text-pure);
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Apple Color Emoji', 'Plus Jakarta Sans', sans-serif;
       padding: 16px;
       padding-bottom: 125px;
       overflow-x: hidden;
@@ -497,7 +497,7 @@
       flex-direction: column;
       justify-content: flex-end;
       align-items: center;
-      z-index: 1000;
+      z-index: 10050;
       cursor: pointer; /* Clicking empty space goes back */
     }
 
@@ -1899,7 +1899,31 @@ body::after {
     }
 
 
-  </style>
+  
+    /* APPLE EMOJI STYLES */
+    img.emoji {
+      height: 1.15em !important;
+      width: 1.15em !important;
+      margin: 0 .08em 0 .08em !important;
+      vertical-align: -0.18em !important;
+      display: inline-block !important;
+      pointer-events: none;
+    }
+
+    /* PROMO MODAL OVERLAP & DOCK BAR HIDING */
+    #promo-modal {
+      z-index: 20000 !important;
+    }
+    #promo-modal .modal-sheet {
+      z-index: 20001 !important;
+    }
+    #promo-modal .modal-outer-nav {
+      z-index: 20002 !important;
+    }
+    body:has(#promo-modal[style*="display: flex"]) #active-order-float-bar {
+      display: none !important;
+    }
+</style>
 <style>
   .product-card.vip-card-highlight {
     display: flex !important;
@@ -1932,6 +1956,52 @@ body::after {
   }
 
 </style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+<script>
+  function applyAppleEmojis(rootNode) {
+    if (typeof twemoji === 'undefined') return;
+    try {
+      twemoji.parse(rootNode || document.body, {
+        base: 'https://cdn.jsdelivr.net/npm/emoji-datasource-apple@15.1.2/img/apple/64/',
+        folder: '',
+        ext: '.png'
+      });
+    } catch(e) {
+      console.warn('Apple emoji parse error:', e);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    applyAppleEmojis();
+    let debounceTimer = null;
+    const observer = new MutationObserver((mutations) => {
+      let hasNewContent = false;
+      for (const m of mutations) {
+        if (m.type === 'childList') {
+          for (const node of m.addedNodes) {
+            if (node.nodeType === 1 && !node.classList.contains('emoji')) {
+              hasNewContent = true;
+              break;
+            }
+          }
+        }
+        if (hasNewContent) break;
+      }
+      if (hasNewContent) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          observer.disconnect();
+          applyAppleEmojis();
+          observer.observe(document.body, { childList: true, subtree: true });
+        }, 80);
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+</script>
+
 </head>
 <body>
 
@@ -3041,10 +3111,17 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
 
     /* PROMOCODE MODAL HANDLERS */
     function openPromoModal() {
-      document.getElementById("promo-modal").style.display = "flex";
+      const floatBar = document.getElementById("active-order-float-bar");
+      if (floatBar) floatBar.style.setProperty("display", "none", "important");
+      const promoModal = document.getElementById("promo-modal");
+      if (promoModal) {
+        promoModal.style.setProperty("z-index", "20000", "important");
+        promoModal.style.display = "flex";
+      }
       document.getElementById("promo-input").value = "";
       document.getElementById("promo-status-msg").style.display = "none";
       syncModalScrollState();
+      if (typeof applyAppleEmojis === 'function') applyAppleEmojis(promoModal);
       applyTranslations();
       if (tg && tg.HapticFeedback) {
         tg.HapticFeedback.impactOccurred("light");
@@ -3054,6 +3131,7 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
     function closePromoModal() {
       document.getElementById("promo-modal").style.display = "none";
       syncModalScrollState();
+      updateFloatingOrderBar();
     }
 
     function applyPromoCode() {
@@ -3061,13 +3139,13 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
       const statusEl = document.getElementById("promo-status-msg");
       statusEl.style.display = "block";
 
-      const validPromos = {
+      const validPromos = Object.assign({
         "SOLKNI": 15,
         "SOLKNI2026": 20,
         "CHILLY": 10,
         "FUNPAY": 10,
         "FREE": 25
-      };
+      }, window._dynamicPromos || {});
 
       if (validPromos[code]) {
         appliedDiscountPercent = validPromos[code];
@@ -3870,6 +3948,11 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
         if (cartBanner) cartBanner.style.display = "none";
         return;
       }
+      const promoModal = document.getElementById("promo-modal");
+      if (promoModal && promoModal.style.display === "flex") {
+        if (bar) bar.style.setProperty("display", "none", "important");
+        return;
+      }
       if (bar) bar.style.display = "flex";
       if (cartBanner) cartBanner.style.display = "block";
     }
@@ -4035,9 +4118,26 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
       }
 
       // Build lot description for FunPay
-      const itemsListStr = cart.map(i => `• ${i.name} (x${i.qty || 1}) - ${(i.unit_price || i.price) * (i.qty || 1)} ₽`).join('\n');
-      const giftsListStr = earnedGifts.length > 0 ? `\n🎁 Бонусы:\n` + earnedGifts.map(g => `• ${g}`).join('\n') : '';
-      const lotFullDesc = `⚡ Заказ из Telegram Mini App Storefront\n\n📦 Состав заказа:\n${itemsListStr}${giftsListStr}\n\n💰 Итого к оплате: ${total} ₽\n⏱️ Срок оплаты: 10 минут`;
+      const giftsListStr = earnedGifts.length > 0 ? `\n🎁 Бонусы:\n` + earnedGifts.map(g => `• ${g}`).join('\n') : "";
+      let includedItems = [];
+      let overflowCount = 0;
+      let currentLength = 20 + giftsListStr.length;
+      for (let i = 0; i < cart.length; i++) {
+        const itemLine = `• ${cart[i].name} (x${cart[i].qty || 1}) - ${(cart[i].unit_price || cart[i].price) * (cart[i].qty || 1)} ₽`;
+        const reserveNeeded = (cart.length - 1 - i > 0) ? 35 : 0;
+        if (currentLength + itemLine.length + 1 + reserveNeeded <= 920) {
+          includedItems.push(itemLine);
+          currentLength += itemLine.length + 1;
+        } else {
+          overflowCount = cart.length - i;
+          break;
+        }
+      }
+      let itemsListStr = includedItems.join('\n');
+      if (overflowCount > 0) {
+        itemsListStr += `\n... и ещё ${overflowCount} позиций`;
+      }
+      const lotFullDesc = `📦 Состав заказа:\n${itemsListStr}${giftsListStr}`;
 
       const payload = {
         action: "cart_checkout",
@@ -4079,6 +4179,10 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
         if (window.fetch) {
           // 1. Посылаем запрос в облачную очередь Firebase на VDS
           try {
+            let tgUserId = null;
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+              tgUserId = window.Telegram.WebApp.initDataUnsafe.user.id;
+            }
             await fetch(fbUrl, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
@@ -4091,6 +4195,7 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
                 items: payload.items,
                 earned_gifts: earnedGifts,
                 platform: selectedPlatform,
+                tg_user_id: tgUserId,
                 created_at: Date.now()
               })
             });
@@ -4152,12 +4257,46 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
       }
 
       if (tg && tg.sendData) {
+        payload.lot_url = funpayOfferUrl;
+        payload.offer_url = funpayOfferUrl;
         tg.sendData(JSON.stringify(payload));
       }
 
       closeCartModal();
       openPaymentExpiryModal(personalLotTitle, total, funpayOfferUrl);
       updateFloatingOrderBar();
+    }
+
+    async function loadDynamicConfig() {
+      try {
+        const resp = await fetch("https://myproj-37ea2-default-rtdb.firebaseio.com/prices.json");
+        if (resp.ok) {
+          const pricesMap = await resp.json();
+          if (pricesMap && typeof pricesMap === "object") {
+            let updated = false;
+            PRODUCTS.forEach(p => {
+              if (pricesMap[p.id] !== undefined && !isNaN(pricesMap[p.id])) {
+                p.price = Number(pricesMap[p.id]);
+                updated = true;
+              }
+            });
+            if (updated) {
+              renderProducts();
+              updateCartBadge();
+            }
+          }
+        }
+      } catch(e) {}
+
+      try {
+        const pResp = await fetch("https://myproj-37ea2-default-rtdb.firebaseio.com/promocodes.json");
+        if (pResp.ok) {
+          const promosMap = await pResp.json();
+          if (promosMap && typeof promosMap === "object") {
+            window._dynamicPromos = promosMap;
+          }
+        }
+      } catch(e) {}
     }
 
     // Startup runner
@@ -4167,6 +4306,7 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
       renderProducts();
       applyTranslations();
       updateCartBadge();
+      loadDynamicConfig();
     });
     try {
       loadCartFromStorage();
@@ -4174,6 +4314,7 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
       renderProducts();
       applyTranslations();
       updateCartBadge();
+      loadDynamicConfig();
     } catch(e) {
       console.warn("Init fallback error:", e);
     }
