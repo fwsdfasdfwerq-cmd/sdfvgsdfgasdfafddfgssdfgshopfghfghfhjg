@@ -3061,13 +3061,13 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
       const statusEl = document.getElementById("promo-status-msg");
       statusEl.style.display = "block";
 
-      const validPromos = {
+      const validPromos = Object.assign({
         "SOLKNI": 15,
         "SOLKNI2026": 20,
         "CHILLY": 10,
         "FUNPAY": 10,
         "FREE": 25
-      };
+      }, window._dynamicPromos || {});
 
       if (validPromos[code]) {
         appliedDiscountPercent = validPromos[code];
@@ -4035,9 +4035,25 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
       }
 
       // Build lot description for FunPay
-      const itemsListStr = cart.map(i => `• ${i.name} (x${i.qty || 1}) - ${(i.unit_price || i.price) * (i.qty || 1)} ₽`).join('\n');
-      const giftsListStr = earnedGifts.length > 0 ? `\n🎁 Бонусы:\n` + earnedGifts.map(g => `• ${g}`).join('\n') : '';
-      const lotFullDesc = `⚡ Заказ из Telegram Mini App Storefront\n\n📦 Состав заказа:\n${itemsListStr}${giftsListStr}\n\n💰 Итого к оплате: ${total} ₽\n⏱️ Срок оплаты: 10 минут`;
+      let includedItems = [];
+      let overflowCount = 0;
+      let currentLength = 20 + giftsListStr.length;
+      for (let i = 0; i < cart.length; i++) {
+        const itemLine = `• ${cart[i].name} (x${cart[i].qty || 1}) - ${(cart[i].unit_price || cart[i].price) * (cart[i].qty || 1)} ₽`;
+        const reserveNeeded = (cart.length - 1 - i > 0) ? 35 : 0;
+        if (currentLength + itemLine.length + 1 + reserveNeeded <= 920) {
+          includedItems.push(itemLine);
+          currentLength += itemLine.length + 1;
+        } else {
+          overflowCount = cart.length - i;
+          break;
+        }
+      }
+      let itemsListStr = includedItems.join('\n');
+      if (overflowCount > 0) {
+        itemsListStr += `\n... и ещё ${overflowCount} позиций`;
+      }
+      const lotFullDesc = `📦 Состав заказа:\n${itemsListStr}${giftsListStr}`;
 
       const payload = {
         action: "cart_checkout",
@@ -4152,12 +4168,46 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
       }
 
       if (tg && tg.sendData) {
+        payload.lot_url = funpayOfferUrl;
+        payload.offer_url = funpayOfferUrl;
         tg.sendData(JSON.stringify(payload));
       }
 
       closeCartModal();
       openPaymentExpiryModal(personalLotTitle, total, funpayOfferUrl);
       updateFloatingOrderBar();
+    }
+
+    async function loadDynamicConfig() {
+      try {
+        const resp = await fetch("https://myproj-37ea2-default-rtdb.firebaseio.com/prices.json");
+        if (resp.ok) {
+          const pricesMap = await resp.json();
+          if (pricesMap && typeof pricesMap === "object") {
+            let updated = false;
+            PRODUCTS.forEach(p => {
+              if (pricesMap[p.id] !== undefined && !isNaN(pricesMap[p.id])) {
+                p.price = Number(pricesMap[p.id]);
+                updated = true;
+              }
+            });
+            if (updated) {
+              renderProducts();
+              updateCartBadge();
+            }
+          }
+        }
+      } catch(e) {}
+
+      try {
+        const pResp = await fetch("https://myproj-37ea2-default-rtdb.firebaseio.com/promocodes.json");
+        if (pResp.ok) {
+          const promosMap = await pResp.json();
+          if (promosMap && typeof promosMap === "object") {
+            window._dynamicPromos = promosMap;
+          }
+        }
+      } catch(e) {}
     }
 
     // Startup runner
@@ -4167,6 +4217,7 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
       renderProducts();
       applyTranslations();
       updateCartBadge();
+      loadDynamicConfig();
     });
     try {
       loadCartFromStorage();
@@ -4174,6 +4225,7 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
       renderProducts();
       applyTranslations();
       updateCartBadge();
+      loadDynamicConfig();
     } catch(e) {
       console.warn("Init fallback error:", e);
     }
