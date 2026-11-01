@@ -4279,29 +4279,36 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
       updateFloatingOrderBar();
     }
 
+    function applyPricesMap(pricesMap) {
+      if (!pricesMap || typeof pricesMap !== "object") return;
+      let updated = false;
+      PRODUCTS.forEach(p => {
+        if (pricesMap[p.id] !== undefined && !isNaN(pricesMap[p.id])) {
+          p.price = Number(pricesMap[p.id]);
+          updated = true;
+        }
+      });
+      if (updated) {
+        renderProducts();
+        updateCartBadge();
+        if (typeof updateOrderPrice === 'function') updateOrderPrice();
+        if (typeof renderCartItems === 'function' && document.getElementById("cart-modal").style.display === "flex") {
+          renderCartItems();
+        }
+      }
+    }
+
     async function loadDynamicConfig() {
       try {
-        const resp = await fetch("https://myproj-37ea2-default-rtdb.firebaseio.com/prices.json");
+        const resp = await fetch("https://myproj-37ea2-default-rtdb.firebaseio.com/prices.json?t=" + Date.now());
         if (resp.ok) {
           const pricesMap = await resp.json();
-          if (pricesMap && typeof pricesMap === "object") {
-            let updated = false;
-            PRODUCTS.forEach(p => {
-              if (pricesMap[p.id] !== undefined && !isNaN(pricesMap[p.id])) {
-                p.price = Number(pricesMap[p.id]);
-                updated = true;
-              }
-            });
-            if (updated) {
-              renderProducts();
-              updateCartBadge();
-            }
-          }
+          applyPricesMap(pricesMap);
         }
       } catch(e) {}
 
       try {
-        const pResp = await fetch("https://myproj-37ea2-default-rtdb.firebaseio.com/promocodes.json");
+        const pResp = await fetch("https://myproj-37ea2-default-rtdb.firebaseio.com/promocodes.json?t=" + Date.now());
         if (pResp.ok) {
           const promosMap = await pResp.json();
           if (promosMap && typeof promosMap === "object") {
@@ -4309,6 +4316,26 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
           }
         }
       } catch(e) {}
+
+      // Connect Realtime SSE Stream for instant updates without page refresh
+      if (typeof window.EventSource !== 'undefined' && !window._fbPricesSource) {
+        try {
+          window._fbPricesSource = new EventSource("https://myproj-37ea2-default-rtdb.firebaseio.com/prices.json");
+          window._fbPricesSource.addEventListener("put", function(e) {
+            try {
+              const payload = JSON.parse(e.data);
+              if (payload.path === "/") {
+                applyPricesMap(payload.data);
+              } else if (payload.path && payload.path.length > 1) {
+                const pid = payload.path.substring(1);
+                const obj = {};
+                obj[pid] = payload.data;
+                applyPricesMap(obj);
+              }
+            } catch(err) {}
+          });
+        } catch(err) {}
+      }
     }
 
     // Startup runner
