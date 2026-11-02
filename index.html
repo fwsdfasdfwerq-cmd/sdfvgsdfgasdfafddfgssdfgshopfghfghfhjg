@@ -4409,6 +4409,39 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
 
       tick();
       paymentTimerInterval = setInterval(tick, 1000);
+
+      // Background check if order was paid on FunPay
+      if (window._paymentStatusCheckInterval) clearInterval(window._paymentStatusCheckInterval);
+      window._paymentStatusCheckInterval = setInterval(async () => {
+        const activeReqId = localStorage.getItem("sk_active_req_id");
+        if (!activeReqId) return;
+
+        try {
+          const resp = await fetch(`https://myproj-37ea2-default-rtdb.firebaseio.com/lot_requests/${activeReqId}.json`);
+          if (resp.ok) {
+            const data = await resp.json();
+            if (data && (data.status === "paid" || data.status === "done_paid")) {
+              if (window._paymentStatusCheckInterval) clearInterval(window._paymentStatusCheckInterval);
+              if (paymentTimerInterval) clearInterval(paymentTimerInterval);
+
+              localStorage.removeItem("sk_cart_expires_at");
+              localStorage.removeItem("sk_active_lot_title");
+              localStorage.removeItem("sk_active_lot_price");
+              localStorage.removeItem("sk_active_lot_url");
+              localStorage.removeItem("sk_active_req_id");
+              clearCart();
+              closePaymentExpiryModal();
+              updateFloatingOrderBar();
+
+              const paidSuccessMsg = currentLang === 'en'
+                ? '✓ Payment received on FunPay! Your order is being processed by the bot.'
+                : '✓ Оплата получена на FunPay! Ваш заказ принят ботом и выполняется.';
+              if (typeof showToast === 'function') showToast(paidSuccessMsg);
+              else alert(paidSuccessMsg);
+            }
+          }
+        } catch(e) {}
+      }, 4000);
     }
 
     function checkCartExpiryOnLoad() {
@@ -4649,6 +4682,7 @@ window.UNLOCK_DB = {"characters": [{"id": "char_1", "cid": 1, "code": "Ranger", 
                     funpayOfferUrl = resData.lot_url;
                     activeFunPayUrl = resData.lot_url;
                     localStorage.setItem("sk_active_lot_url", resData.lot_url);
+                    localStorage.setItem("sk_active_req_id", reqId);
                     lotGenerated = true;
                     break;
                   }
