@@ -2488,7 +2488,7 @@ button{transition-property:background-color,opacity,transform!important;transiti
     <div class="modal-sheet" onclick="event.stopPropagation()">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
         <h2 class="modal-title" data-i18n="cart_title">Ваша корзина</h2>
-        <button onclick="closeCartModal()" style="background:rgba(255,255,255,0.06); border:none; color:#fff; width:30px; height:30px; border-radius:50%; font-size:15px; cursor:pointer;">✕</button>
+        <button onclick="cartGoBack()" class="cart-back-visible" type="button">⬅️ Назад</button>
       </div>
 
       <!-- PENDING PAYMENT BANNER IN CART -->
@@ -3830,7 +3830,9 @@ window.UNLOCK_DB = {"characters":[{"id":"char_1","cid":1,"code":"Ranger","name":
       saveCartToStorage();
       updateCartBadge();
       renderProducts();
+      window.cartReturnToProduct = activeProduct ? activeProduct.id : null;
       closeOrderModal();
+      openCartModal();
 
       if (tg && tg.HapticFeedback) {
         tg.HapticFeedback.notificationOccurred("success");
@@ -5484,11 +5486,20 @@ body .bottom-dock-container{background:linear-gradient(0deg,#11121c 40%,transpar
 window.setStoreTab=function(tab){
  document.querySelectorAll('.clear-bottom-nav .dock-btn').forEach(b=>b.classList.toggle('active',b.id===({catalog:'nav-catalog',cart:'btn-cart',profile:'nav-profile'})[tab]));
  if(tab==='catalog'){closeAccount();closeCartModal();window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}
- else if(tab==='cart'){closeAccount();openCartModal();}
+ else if(tab==='cart'){window.cartReturnToProduct=null;closeAccount();openCartModal();}
  else{closeCartModal();openAccount();}
 };
 document.querySelectorAll('.btn-top-back').forEach(b=>{b.setAttribute('aria-label','Назад');if(!b.textContent.trim())b.append(document.createTextNode(' Назад'));});
 const clearLangLabels=()=>document.querySelectorAll('[data-clear-ru]').forEach(b=>{b.textContent=currentLang==='en'?b.dataset.clearEn:b.dataset.clearRu;});
 const clearToggleLanguage=toggleLanguage;toggleLanguage=function(){clearToggleLanguage();clearLangLabels();};
+</script><style>
+body #cart-modal>.modal-outer-nav{display:none!important}
+body #cart-modal .cart-back-visible{background:#344c88!important;border:1px solid #87a2e755!important;border-radius:12px!important;color:white!important;font:600 13px 'Golos Text',sans-serif!important;min-height:44px!important;padding:10px 14px!important;cursor:pointer!important}
+</style><script>
+window.cartGoBack=function(){
+ const pid=window.cartReturnToProduct;window.cartReturnToProduct=null;closeCartModal();
+ if(pid&&PRODUCTS.some(p=>p.id===pid))openOrder(pid);
+ document.querySelectorAll('.clear-bottom-nav .dock-btn').forEach(b=>b.classList.toggle('active',b.id==='nav-catalog'));
+};
 </script></body>
 </html>
