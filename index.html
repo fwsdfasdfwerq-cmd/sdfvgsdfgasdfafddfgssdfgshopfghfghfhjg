@@ -2145,7 +2145,7 @@ button{transition-property:background-color,opacity,transform!important;transiti
 
     <!-- PRODUCTS / VIEW CONTAINER -->
     <div class="aurora-strip"><span class="status-dot"></span><span><b id="sync-label">Синхронизация работает</b> · <span id="sync-updated">обновлено сегодня</span></span></div><div class="quick-stats"><div class="quick-stat"><strong>24/7</strong><span id="stat-auto">автовыдача</span></div><div class="quick-stat"><strong>100%</strong><span id="stat-safe">безопасно</span></div><div class="quick-stat"><strong>1 мин</strong><span id="stat-delivery">доставка</span></div></div><div class="section-title" id="cat-title">Все товары</div>
-    <div class="account-strip"><button class="account-pill" id="account-pill" onclick="openAccount()"><span class="account-avatar" id="account-avatar">S</span><span><strong id="account-name">Личный кабинет</strong><small>Покупки · общая корзина →</small></span></button><span class="account-sync" id="account-sync" role="status">Подключаем аккаунт…</span></div><div class="catalog-toolbar"><div class="catalog-caption"><span id="catalog-label">Каталог</span><small id="catalog-count"></small></div><label class="catalog-search"><span>⌕</span><input id="catalog-search" type="search" placeholder="Найти товар" data-placeholder-ru="Найти товар" data-placeholder-en="Search products" autocomplete="off"></label></div><div class="products-grid" id="products-list">
+    <div class="account-strip"><button class="account-pill" id="account-pill" onclick="openAccount()"><span class="account-avatar" id="account-avatar">S</span><span><strong id="account-name">Личный кабинет</strong><small>Покупки · общая корзина →</small></span></button><span class="account-sync" id="account-sync" role="status">Подключаем аккаунт…</span></div><div class="catalog-toolbar"><div class="catalog-caption"><span id="catalog-label">Каталог</span><small id="catalog-count"></small></div><label class="catalog-search"><span>⌕</span><input id="catalog-search" type="search" placeholder="Найти товар" data-placeholder-ru="Найти товар" data-placeholder-en="Search products" autocomplete="off"></label></div><div class="clear-categories" aria-label="Категории товаров"><button class="category-chip active" id="btn-all" onclick="switchCategory('all')">🛍 Все</button><button class="category-chip" id="btn-single" onclick="switchCategory('single')">🎭 Поштучно</button><button class="category-chip" id="btn-sets" onclick="switchCategory('sets')">🎁 Наборы</button><button class="category-chip" id="btn-currency" onclick="switchCategory('currency')">💎 Валюта</button><button class="category-chip" id="btn-garden" onclick="switchCategory('garden')">🌱 Ресурсы и сад</button></div><div class="products-grid" id="products-list">
       <!-- Rendered via JS -->
     </div>
   </div>
@@ -2176,35 +2176,11 @@ button{transition-property:background-color,opacity,transform!important;transiti
   </div>
 
   <!-- BOTTOM FLOATING DOCK (CUSTOM VECTOR ICONS) -->
-  <div class="bottom-dock-container">
-    <div class="bottom-dock">
-      <!-- 1. All Products (Grid icon) -->
-      <button class="dock-btn active" id="btn-all" onclick="switchCategory('all')" title="Все товары">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-      </button>
-      <!-- 2. Single Unlocks (Target / Crosshair icon) -->
-      <button class="dock-btn" id="btn-single" onclick="switchCategory('single')" title="Поштучно">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
-      </button>
-      <!-- 3. Sets (Package / Box icon) -->
-      <button class="dock-btn" id="btn-sets" onclick="switchCategory('sets')" title="Наборы">
-        <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-      </button>
-      <!-- 4. Currency (Diamond / Crystal icon) -->
-      <button class="dock-btn" id="btn-currency" onclick="switchCategory('currency')" title="Валюта">
-        <svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 13L2 9z"></path><path d="M2 9h20"></path><path d="M10 3l-4 6 6 13 6-13-4-6"></path></svg>
-      </button>
-      <!-- 5. Garden / Unlocks (Leaf icon) -->
-      <button class="dock-btn" id="btn-garden" onclick="switchCategory('garden')" title="Грядки">
-        <svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg>
-      </button>
-      <!-- 6. Cart (Shopping Bag icon) -->
-      <button class="dock-btn" id="btn-cart" onclick="openCartModal()" title="Корзина">
-        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-        <span class="dock-badge" id="dock-cart-badge" style="display:none;">0</span>
-      </button>
-    </div>
-  </div>
+  <div class="bottom-dock-container"><nav class="bottom-dock clear-bottom-nav" aria-label="Основные разделы">
+<button class="dock-btn active" id="nav-catalog" onclick="setStoreTab('catalog')"><span>🛍</span><b data-clear-ru="Каталог" data-clear-en="Catalogue">Каталог</b></button>
+<button class="dock-btn" id="btn-cart" onclick="setStoreTab('cart')"><span>🛒</span><b data-clear-ru="Корзина" data-clear-en="Cart">Корзина</b><span class="dock-badge" id="dock-cart-badge" style="display:none">0</span></button>
+<button class="dock-btn" id="nav-profile" onclick="setStoreTab('profile')"><span>👤</span><b data-clear-ru="Профиль" data-clear-en="Profile">Профиль</b></button>
+</nav></div>
 
   <!-- PROMOCODE MODAL SHEET -->
   <div class="modal-overlay" id="promo-modal" onclick="handleBackdropClick(event, 'promo-modal')">
@@ -2576,8 +2552,8 @@ window.UNLOCK_DB = {"characters":[{"id":"char_1","cid":1,"code":"Ranger","name":
     const I18N = {
   "ru": {
     "brand": "SolKni",
-    "hero_title": "Твой следующий апгрейд",
-    "hero_subtitle": "Герои, образы и арсенал для нового забега. Собери свой апгрейд — остальное сделаем мы.",
+    "hero_title": "🛍 Магазин Soul Knight",
+    "hero_subtitle": "Выберите товар → добавьте в корзину → оплатите на FunPay.",
     "cart_top": "Корзина",
     "cat_all": "Все товары",
     "cat_single": "Поштучно",
@@ -2625,8 +2601,8 @@ window.UNLOCK_DB = {"characters":[{"id":"char_1","cid":1,"code":"Ranger","name":
   },
   "en": {
     "brand": "SolKni",
-    "hero_title": "SolKni",
-    "hero_subtitle": "Instant delivery of currency, skins, skills, and full sets directly to your account.",
+    "hero_title": "🛍 Soul Knight Store",
+    "hero_subtitle": "Choose an item → add to cart → pay on FunPay.",
     "cart_top": "Cart",
     "cat_all": "All Items",
     "cat_single": "Singles",
@@ -2816,7 +2792,7 @@ window.UNLOCK_DB = {"characters":[{"id":"char_1","cid":1,"code":"Ranger","name":
           }
         }
 
-        let actionBtnHtml = `<button class="btn-buy" onclick="openOrder('${p.id}')">${orderLabel}</button>`;
+        let actionBtnHtml = `<button class="btn-buy" onclick="openOrder('${p.id}')">🛍 ${orderLabel}</button>`;
         if (isLockedByBundle) {
           actionBtnHtml = `<button class="btn-buy" disabled style="opacity:0.55; cursor:not-allowed; background:rgba(255,255,255,0.08) !important; border:1px solid rgba(255,255,255,0.15) !important; color:#9ca3af !important; font-size:11px !important; padding:8px 12px !important; box-shadow:none !important;" title="${lockReason}">Уже в наборе</button>`;
         }
@@ -2848,7 +2824,7 @@ window.UNLOCK_DB = {"characters":[{"id":"char_1","cid":1,"code":"Ranger","name":
 
     function switchCategory(cat) {
       currentCategory = cat;
-      document.querySelectorAll(".dock-btn").forEach(btn => {
+      document.querySelectorAll(".category-chip").forEach(btn => {
         btn.classList.toggle("active", btn.id === `btn-${cat}`);
       });
       renderProducts();
@@ -5494,5 +5470,25 @@ async function start(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
+</script><style id="clear-store-ui-20261117">
+body{background:#11121c!important;font-family:'Golos Text',sans-serif!important;padding:18px 14px 112px!important}body .app-container{max-width:620px!important}body .top-header{margin-bottom:14px!important}body .cart-btn-top{display:none!important}body .hero-banner{min-height:0!important;padding:20px!important;margin-bottom:12px!important;text-align:left!important;background:linear-gradient(125deg,#262653,#1b1b32)!important;border:1px solid #6e6cbb50!important;border-radius:22px!important;box-shadow:none!important}body .hero-banner:before,body .hero-banner:after{display:none!important}body .hero-banner .hero-title{font-family:'Golos Text',sans-serif!important;font-size:25px!important;letter-spacing:-.7px!important;line-height:1.25!important;max-width:100%!important;margin:0 0 9px!important;background:none!important;-webkit-text-fill-color:#fff!important;color:#fff!important}body .hero-banner .hero-subtitle{max-width:100%!important;font-size:13px!important;line-height:1.7!important;color:#d6d5f2!important;margin:0!important}body .hero-banner .badge-top{display:none!important}body .quick-stats,body .aurora-strip,body #cat-title{display:none!important}
+body .account-strip{margin:8px 2px 22px!important;gap:10px!important}body .account-strip .account-pill{padding:0!important;pointer-events:none}body .account-strip .account-pill small{display:none!important}body .account-strip .account-avatar{width:30px!important;height:30px!important;font-size:13px!important;border-radius:10px!important;background:#343059!important;color:#d5cfff!important}body .account-strip .account-sync{font-size:10px!important;max-width:190px!important;color:#9bd9ba!important}body .catalog-toolbar{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:14px!important;margin:0 0 12px!important}body .catalog-caption{font-size:21px!important;letter-spacing:-.4px!important}body .catalog-search{width:100%!important;border:1px solid #8187b940!important;background:#222436!important;border-radius:14px!important;padding:12px 14px!important;min-height:48px!important}body .catalog-search input{color:white!important;font-size:14px!important;user-select:text!important}body .catalog-search input::placeholder{color:#b6b7d0!important}
+body .clear-categories{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 17px}body .category-chip{background:#2a3156!important;border:1px solid #6674bb55!important;color:#dce4ff!important;font:600 12px 'Golos Text',sans-serif;padding:11px 13px!important;min-height:42px;border-radius:12px!important;cursor:pointer}body .category-chip.active{background:#5a55d8!important;border-color:#9e9aff!important;color:white!important;box-shadow:0 3px 14px #6257d630!important}
+body .products-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important}body .products-grid .product-card{padding:16px!important;border-radius:19px!important;background:#202232!important;border:1px solid #73799e26!important;box-shadow:0 4px 16px #0002!important;transform:none!important;animation:none!important}body .products-grid .product-card.vip-card-highlight,body .products-grid .product-card.featured{background:linear-gradient(115deg,#30284b,#242337)!important;border:1px solid #bd8fff55!important}body .product-card .product-header{display:flex!important;gap:13px!important;align-items:center!important;margin:0 0 14px!important}body .product-card .product-icon-wrap{width:54px!important;height:54px!important;flex-basis:54px!important;flex-shrink:0!important;border-radius:13px!important;background:#303347!important;border:0!important;box-shadow:none!important}body .product-card .product-custom-icon{width:42px!important;height:42px!important}body .product-card .product-name{font:650 15px/1.4 'Golos Text',sans-serif!important;letter-spacing:0!important;color:#fff!important;max-width:100%!important}body .product-card .product-footer{display:flex!important;align-items:center!important;justify-content:space-between!important;margin:0!important;padding-top:11px!important;border-top:1px solid #ffffff0c!important}body .product-card .product-price{font:800 20px 'Golos Text',sans-serif!important;color:#fff!important}body .product-card .product-price span{font-size:15px!important;color:#aeb5d0!important}
+body .btn-buy,body .btn-submit,body .btn-modal-add-cart,body .account-action{background:#21864e!important;border:1px solid #68cf8c55!important;color:white!important;min-height:44px!important;border-radius:12px!important;box-shadow:0 4px 12px #13773f20!important;font-weight:700!important;letter-spacing:0!important;padding:11px 17px!important}body .btn-buy:disabled,body .btn-submit:disabled,body button.disabled{background:#75404b!important;border-color:#ce7c8955!important;color:#ffe2e7!important;box-shadow:none!important;opacity:.75!important}
+body .btn-remove-item,body .btn-clear-cart-link,body .btn-remove,body #confirm-action-btn{background:#8b3646!important;border:1px solid #e68d9e50!important;color:#ffe0e5!important;border-radius:11px!important;min-height:40px!important;padding:9px 12px!important}body .btn-top-back,body .btn-conflict-cancel,body .account-back{background:#344c88!important;border:1px solid #87a2e755!important;color:#e6efff!important;border-radius:12px!important;box-shadow:none!important}body .btn-conflict-confirm{background:#21864e!important;color:#fff!important}body .lang-btn{background:#333660!important;border-color:#868bc54d!important;color:#e5e8ff!important}
+body .bottom-dock-container{background:linear-gradient(0deg,#11121c 40%,transparent)!important;padding:20px 14px max(14px,env(safe-area-inset-bottom))!important;bottom:0!important}body .bottom-dock.clear-bottom-nav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;max-width:620px!important;width:100%!important;gap:8px!important;padding:8px!important;border-radius:20px!important;background:#24273cf5!important;border:1px solid #7d84af33!important;box-shadow:0 6px 24px #0005!important}body .clear-bottom-nav .dock-btn{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;width:auto!important;height:auto!important;min-height:58px!important;border-radius:13px!important;background:#344575!important;color:#dbe7ff!important;border:1px solid #7f98d433!important;box-shadow:none!important;padding:6px!important}body .clear-bottom-nav .dock-btn>span:first-child{font-size:21px!important;line-height:1.2!important}body .clear-bottom-nav .dock-btn b{font:600 11px 'Golos Text',sans-serif!important}body .clear-bottom-nav .dock-btn.active{background:#5952c4!important;color:#fff!important;border-color:#a8a1ff!important}body .clear-bottom-nav #btn-cart{background:#245d40!important;border-color:#65b58855!important}body .clear-bottom-nav #nav-profile{background:#493675!important;border-color:#a68bd455!important}body .modal-sheet{background:#202335!important;border:1px solid #7a83b155!important;border-radius:22px!important;box-shadow:0 14px 50px #0007!important;overscroll-behavior:contain}body .account-panel{background:#141624!important}body .account-stat,body .account-order{background:#24273e!important;border-color:#838ab536!important}body .account-stat span,body .account-caption,body .account-order p,body .profile-handle{color:#b9c2db!important}body .profile-eyebrow,body .account-order a{color:#b5b6ff!important}body .account-stats button{color:white!important;text-align:left!important}body .btn-top-back{min-height:44px!important;min-width:44px!important}body button{cursor:pointer!important}body button:focus-visible,body a:focus-visible{outline:2px solid #bebdff!important;outline-offset:3px!important}
+@media(prefers-reduced-motion:no-preference){body button:not(:disabled):active{transform:scale(.96)!important;transition:transform 150ms ease-out!important}}
+@media(prefers-reduced-motion:reduce){body *,body *:before,body *:after{animation:none!important;transition:none!important}}
+</style><script>
+window.setStoreTab=function(tab){
+ document.querySelectorAll('.clear-bottom-nav .dock-btn').forEach(b=>b.classList.toggle('active',b.id===({catalog:'nav-catalog',cart:'btn-cart',profile:'nav-profile'})[tab]));
+ if(tab==='catalog'){closeAccount();closeCartModal();window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}
+ else if(tab==='cart'){closeAccount();openCartModal();}
+ else{closeCartModal();openAccount();}
+};
+document.querySelectorAll('.btn-top-back').forEach(b=>{b.setAttribute('aria-label','Назад');if(!b.textContent.trim())b.append(document.createTextNode(' Назад'));});
+const clearLangLabels=()=>document.querySelectorAll('[data-clear-ru]').forEach(b=>{b.textContent=currentLang==='en'?b.dataset.clearEn:b.dataset.clearRu;});
+const clearToggleLanguage=toggleLanguage;toggleLanguage=function(){clearToggleLanguage();clearLangLabels();};
 </script></body>
 </html>
