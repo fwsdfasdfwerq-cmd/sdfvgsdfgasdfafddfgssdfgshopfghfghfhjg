@@ -37,7 +37,7 @@ $('importBtn').onclick=async()=>{const f=$('importFile').files[0];if(!f){status(
 $('refreshBtn').onclick=refreshCatalog;$('productSearch').oninput=renderProducts;$('category').onchange=renderProducts;
 $('pickerClose').onclick=()=>$('picker').close();$('itemSearch').oninput=()=>{itemPage=0;renderItems()};$('prevPage').onclick=()=>{itemPage--;renderItems()};$('nextPage').onclick=()=>{itemPage++;renderItems()};$('pickerAdd').onclick=()=>{for(const id of picked){const i=itemFor(activeProduct,id);if(i)add(activeProduct.id,i)}$('picker').close();status('Позиции добавлены в список к применению.',true)};
 document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{for(const view of ['catalog','advanced','history'])$('view-'+view).classList.toggle('hidden',view!==b.dataset.view);document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===b));$('pageTitle').textContent=b.dataset.view==='catalog'?'Товары магазина':b.dataset.view==='advanced'?'Ручные действия':'История изменений'});
-window.addEventListener('beforeunload',e=>{saveWork();if(busy){e.preventDefault();e.returnValue=''}});if(location.pathname==='/editor')$('api').value=location.origin;
+window.addEventListener('beforeunload',e=>{if($('key').value)saveServices();saveWork();if(busy){e.preventDefault();e.returnValue=''}});if(location.pathname==='/editor')$('api').value=location.origin;
 
 const SERVICE_STORAGE='solkni.editor.services.v1';
 function saveServices(){try{localStorage.setItem(SERVICE_STORAGE,JSON.stringify({api:base(),key:$('key').value,session}))}catch{status('Браузер запретил запоминание служебных ключей.')}}
@@ -49,7 +49,7 @@ async function cloudCall(path,payload){try{return await call(path,payload)}catch
 async function exitEditor(){if(busy)return;if(!confirm('Выйти из этого игрового аккаунта? Рабочий черновик редактора будет удалён. Сохранённое облако останется без изменений.'))return;setBusy(true);try{await call('/editor-api/logout');try{localStorage.removeItem('solkni.editor.work.'+session)}catch{}session='';saveServices();clearInterval(poll);queue=[];pendingRequest=null;dirty=false;$('email').value='';$('password').value='';$('workspace').classList.add('hidden');$('login').classList.remove('hidden');$('resumeBtn').classList.add('hidden');$('loginStatus').textContent='Вы вышли из аккаунта. Служебный ключ сохранён.'}catch(e){status('Не удалось выйти: '+e.message+' Черновик сохранён.')}finally{setBusy(false)}}
 $('logoutTop').onclick=exitEditor;$('logoutBtn').onclick=exitEditor;$('refreshTop').onclick=refreshCatalog;$('resumeBtn').onclick=resumeEditor;
 $('forgetKey').onclick=()=>{if(!confirm('Забыть адрес API и служебные ключи в этом браузере?'))return;try{localStorage.removeItem(SERVICE_STORAGE)}catch{}$('key').value='';session='';$('resumeBtn').classList.add('hidden')};
-for(const id of ['api','key'])$(id).addEventListener('change',saveServices);
+for(const id of ['api','key']){ $(id).addEventListener('change',saveServices); $(id).addEventListener('input',saveServices); }
 try{const saved=JSON.parse(localStorage.getItem(SERVICE_STORAGE)||'{}');if(saved.api)$('api').value=saved.api;if(saved.key)$('key').value=saved.key;if(saved.session){session=saved.session;$('resumeBtn').classList.remove('hidden');resumeEditor()}}catch{}
 
 </script></body></html>
