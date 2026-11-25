@@ -3236,9 +3236,18 @@ window.UNLOCK_DB = {"characters":[{"id":"char_1","cid":1,"code":"Ranger","name":
       return new Intl.NumberFormat(currentLang === 'en' ? 'en-US' : 'ru-RU', {maximumFractionDigits:2}).format(n) + ' ₽';
     }
     function setFunPayPrices(snapshot) {
-      if (!snapshot || !Number.isFinite(snapshot.ts) || snapshot.ts < verifiedFunPay.ts ||
+      if (!snapshot || snapshot.basis !== "seller" || !Number.isFinite(snapshot.ts) || snapshot.ts < verifiedFunPay.ts ||
           !snapshot.lots || typeof snapshot.lots !== 'object' || Array.isArray(snapshot.lots)) return;
       verifiedFunPay = snapshot;
+      for (const p of PRODUCTS) {
+        const n = freshFunPayPrice(p.funpay_price_lots?.default);
+        if (n !== null) p.price = n;
+      }
+      for (const item of cart) {
+        const p = PRODUCTS.find(p => p.id === item.id);
+        const n = freshFunPayPrice(p?.funpay_price_lots?.default);
+        if (n !== null) { item.unit_price = n; item.price = Math.round(n * (item.qty || 1) * 100) / 100; }
+      }
     }
     function renderFullAccPrices() {
       const p = PRODUCTS.find(x => x.id === 'fp_full_account');
@@ -3253,7 +3262,7 @@ window.UNLOCK_DB = {"characters":[{"id":"char_1","cid":1,"code":"Ranger","name":
       const ids = Object.values(p.funpay_price_lots || {});
       if (!ids.length) return p.price + ' <span>₽</span>';
       const prices = ids.map(freshFunPayPrice).filter(n => n !== null);
-      if (!prices.length) return '<span>' + (currentLang === 'en' ? 'Price on FunPay' : 'Цена на FunPay') + '</span>';
+      if (!prices.length) return '<span>' + (currentLang === 'en' ? 'See FunPay' : 'Уточнить на FunPay') + '</span>';
       const value = formatFunPayPrice(Math.min(...prices));
       return ((ids.length > 1 && (prices.length < ids.length || new Set(prices).size > 1))
         ? (currentLang === 'en' ? 'From ' : 'От ') : '') + value;
@@ -3272,26 +3281,27 @@ window.UNLOCK_DB = {"characters":[{"id":"char_1","cid":1,"code":"Ranger","name":
       a.href = url;
       const n = freshFunPayPrice(p.funpay_price_lots.default);
       a.textContent = (currentLang === 'en' ? 'Buy on FunPay' : 'Купить на FunPay') + (n === null ? '' : ' · ' + formatFunPayPrice(n));
-      node.querySelector('p').textContent = currentLang === 'en' ? 'The cart below creates a separate custom order.' : 'Корзина ниже создаёт отдельный персональный заказ.';
+      node.querySelector('p').textContent = currentLang === 'en' ? 'Price before the FunPay fee. The cart creates a separate order.' : 'Цена без комиссии FunPay. Корзина создаёт отдельный заказ.';
     }
 
     function refreshFunPayUI() {
       renderProducts();
       renderFullAccPrices();
       renderFunPayOrderLink(activeProduct);
+      if (document.getElementById('cart-modal')?.style.display === 'flex') renderCartItems();
       if (typeof renderHeroArt === "function") renderHeroArt();
     }
     function applyPricesMap(pricesMap) {
       if (!pricesMap || typeof pricesMap !== "object") return;
-      setFunPayPrices(pricesMap._funpay_v1);
+      setFunPayPrices(pricesMap._funpay_net_v1);
       let updated = false;
       PRODUCTS.forEach(p => {
-        if (pricesMap[p.id] !== undefined && !isNaN(pricesMap[p.id])) {
+        if (freshFunPayPrice(p.funpay_price_lots?.default) === null && pricesMap[p.id] !== undefined && !isNaN(pricesMap[p.id])) {
           p.price = Number(pricesMap[p.id]);
           updated = true;
         }
       });
-      if (updated || pricesMap._funpay_v1) {
+      if (updated || pricesMap._funpay_net_v1) {
         refreshFunPayUI();
         updateCartBadge();
         if (typeof updateOrderPrice === 'function') updateOrderPrice();
@@ -3301,7 +3311,19 @@ window.UNLOCK_DB = {"characters":[{"id":"char_1","cid":1,"code":"Ranger","name":
       }
     }
 
+    const publicFunPayFeed = "https://myproj-37ea2-default-rtdb.firebaseio.com/prices/_funpay_net_v1.json";
+    const funPayFeed = location.origin === "http://127.0.0.1:8766"
+      ? "/_preview/prices" : publicFunPayFeed;
+    async function refreshVerifiedPrices() {
+      try {
+        const r = await fetch(funPayFeed, {cache:"no-store",signal:AbortSignal.timeout(9000)});
+        if (r.ok) setFunPayPrices(await r.json());
+      } catch {}
+      refreshFunPayUI();
+    }
     async function loadDynamicConfig() {
+      refreshVerifiedPrices();
+      if (!window._fpPeriodicRefresh) window._fpPeriodicRefresh = setInterval(refreshVerifiedPrices,45000);
       try {
         const resp = await fetch("https://myproj-37ea2-default-rtdb.firebaseio.com/prices.json?t=" + Date.now());
         if (resp.ok) {
@@ -3320,15 +3342,6 @@ window.UNLOCK_DB = {"characters":[{"id":"char_1","cid":1,"code":"Ranger","name":
         }
       } catch(e) {}
 
-      if (!window._fpPeriodicRefresh) {
-        window._fpPeriodicRefresh = setInterval(async () => {
-          try {
-            const r = await fetch("https://myproj-37ea2-default-rtdb.firebaseio.com/prices/_funpay_v1.json", {cache:"no-store",signal:AbortSignal.timeout(6000)});
-            if (r.ok) setFunPayPrices(await r.json());
-          } catch {}
-          refreshFunPayUI();
-        },45000);
-      }
       // Connect Realtime SSE Stream for instant updates without page refresh
       if (typeof window.EventSource !== 'undefined' && !window._fbPricesSource) {
         try {
